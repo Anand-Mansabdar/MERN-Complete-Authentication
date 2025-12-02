@@ -1,6 +1,7 @@
 import userModel from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import transporter from "../config/nodemailer.js";
 
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -37,8 +38,22 @@ export const register = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    // Sending welcome email
+    const mailOptions = {
+      from: process.env.SENDER_EMAIL,
+      to: email,
+      subject: `${name} !!! Welcome to my MERN-Auth-project: You have created an account with email: ${email}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
     return res.status(200).json({
       message: "User registered successfully",
+      user: {
+        email: email,
+        userName: name,
+        password: hashedPassword,
+      },
     });
   } catch (error) {
     return res.status(400).json({
