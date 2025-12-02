@@ -36,10 +36,77 @@ export const register = async (req, res) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+
+    return res.status(200).json({
+      message: "User registered successfully",
+    });
   } catch (error) {
     return res.status(400).json({
       success: false,
       message: "Missing Name or email or password",
+    });
+  }
+};
+
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({
+      message: "Missing required fields",
+    });
+  }
+
+  try {
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid username or password",
+      });
+    }
+
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      return res.status(400).json({
+        message: "Invalid username or password",
+      });
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(200).json({
+      message: "User logged in successfully",
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: error.message,
+    });
+  }
+};
+
+export const logout = async (req, res) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+    });
+
+    return res.status(200).json({
+      message: "User logged out successfully",
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: error.message,
     });
   }
 };
