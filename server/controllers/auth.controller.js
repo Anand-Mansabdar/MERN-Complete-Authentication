@@ -125,3 +125,51 @@ export const logout = async (req, res) => {
     });
   }
 };
+
+// Sending Verification Otp to email
+export const sendVerifyOtp = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      res.status(400).json({
+        message: `User does not exist`,
+      });
+    }
+
+    if (user.isAccountVerified) {
+      return res.status(400).json({
+        success: false,
+        message: `Account is already verified!!`,
+      });
+    }
+
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+
+    user.verifyOtp = otp;
+
+    user.verifyOtpExpireAt = Date.now() + 24 * 60 * 60 * 1000;
+
+    await user.save();
+
+    const mailOption = {
+      from: process.env.SENDER_EMAIL,
+      to: user.email,
+      subject: `Account Verification OTP`,
+      text: `Your OTP is ${otp}. Verify your account using this OTP`,
+    };
+
+    await transporter.sendMail(mailOption);
+
+    res.json({
+      success: true,
+      message: `Verification OTP sent on email`,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
