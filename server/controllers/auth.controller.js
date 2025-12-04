@@ -129,7 +129,7 @@ export const logout = async (req, res) => {
 // Sending Verification Otp to email
 export const sendVerifyOtp = async (req, res) => {
   try {
-    const { userId } = req.body;
+    const userId = req.userId;
 
     const user = await userModel.findById(userId);
     if (!user) {
@@ -175,7 +175,8 @@ export const sendVerifyOtp = async (req, res) => {
 };
 
 export const verifyEmail = async (req, res) => {
-  const { userId, otp } = req.body;
+  const { otp } = req.body;
+  const userId = req.userId;
 
   if (!userId || !otp) {
     return res.status(400).json({
