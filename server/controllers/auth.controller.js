@@ -48,6 +48,7 @@ export const register = async (req, res) => {
     await transporter.sendMail(mailOptions);
 
     return res.status(200).json({
+      success: true,
       message: "User registered successfully",
       user: {
         email: email,
@@ -99,6 +100,7 @@ export const login = async (req, res) => {
     });
 
     return res.status(200).json({
+      success: true,
       message: "User logged in successfully",
     });
   } catch (error) {

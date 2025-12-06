@@ -5,7 +5,7 @@ export const AppContext = createContext();
 export const AppContextProvider = (props) => {
   // Variables used in multiple components
   const backendUrl = import.meta.env.VITE_URL;
-  const [isLoggedIn, setIsLoggedIn] = props.useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState(false);
 
   const value = {
